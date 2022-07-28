@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Drawer,
@@ -9,18 +10,54 @@ import {
   Typography,
 } from "@mui/material";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined"
+import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined";
 import assets from "../../assets/index";
+import boardApi from "../../api/boardApi";
+import { setBoards } from "../../redux/features/boardSlice";
+import { DragDropContext, Draggable, Droppable  } from "react-beautiful-dnd"
 
 const Sidebar = () => {
   const user = useSelector((state) => state.user.value);
+  const boards = useSelector((state) => state.board.value);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { boardId } = useParams();
+  const [activeIndex, setActiveIndex] = useState();
+
   const sidebarWidth = 250;
+
+  useEffect(() => {
+    const getBoards = async () => {
+      try {
+        const res = await boardApi.getAll();
+        dispatch(setBoards(res));
+        if (res.length > 0 && boardId === undefined) {
+          navigate(`/boards/${res[0].id}`);
+        }
+      } catch (err) {
+        alert(err);
+      }
+    };
+    getBoards();
+  }, []);
+
+  useEffect(() => {
+    updateActive(boards);
+  }, [boards]);
+
+  const updateActive = (listBoards) => {
+    const activeItem = listBoards.findIndex((e) => e.id === boardId);
+    setActiveIndex(activeItem);
+  };
 
   const logout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
+
+  const onDragEnd = () => {
+    
+  }
 
   return (
     <Drawer
@@ -91,6 +128,9 @@ const Sidebar = () => {
             </IconButton>
           </Box>
         </ListItem>
+        <DragDropContext onDragEnd={onDragEnd}>
+
+        </DragDropContext>
       </List>
     </Drawer>
   );
