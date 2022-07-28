@@ -23,7 +23,7 @@ const AppLayout = () => {
       }
     };
     checkAuth();
-  }, [navigate]);
+  }, [navigate, dispatch]);
 
   return loading ? (
     <Loading fullHeight />
