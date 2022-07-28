@@ -39,7 +39,7 @@ exports.login = async (req, res) => {
 
     if (decryptedPass !== password) {
       return res.status(401).json({
-        errors: [{ param: "username", msg: "Invalid username or password" }],
+        errors: [{ param: "password", msg: "Invalid username or password" }],
       });
     }
 

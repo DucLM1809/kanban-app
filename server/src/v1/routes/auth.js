@@ -28,7 +28,7 @@ router.post(
 );
 
 router.post(
-  "login",
+  "/login",
   body("username")
     .isLength({ min: 8 })
     .withMessage("username must be at least 8 characters"),
@@ -39,7 +39,7 @@ router.post(
   userController.login
 );
 
-router.post("verify-token", tokenHandler.verifyToken, (req, res) => {
+router.post("/verify-token", tokenHandler.verifyToken, (req, res) => {
   res.status(200).json({ user: req.user });
 });
 
