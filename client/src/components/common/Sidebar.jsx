@@ -32,7 +32,6 @@ const Sidebar = () => {
       try {
         const res = await boardApi.getAll();
         dispatch(setBoards(res));
-       
       } catch (err) {
         alert(err);
       }
@@ -41,7 +40,6 @@ const Sidebar = () => {
   }, [dispatch]);
 
   useEffect(() => {
-   
     const activeItem = boards.findIndex((e) => e.id === boardId);
     if (boards.length > 0 && boardId === undefined) {
       navigate(`/boards/${boards[0].id}`);
@@ -54,13 +52,27 @@ const Sidebar = () => {
     navigate("/login");
   };
 
-  const onDragEnd = () => {};
+  const onDragEnd = async ({ source, destination }) => {
+    const newList = [...boards];
+    const [removed] = newList.splice(source.index, 1);
+    newList.splice(destination.index, 0, removed);
+
+    const activeItem = newList.findIndex((e) => e.id === boardId);
+    setActiveIndex(activeItem);
+    dispatch(setBoards(newList));
+
+    try {
+      await boardApi.updatePosition({ boards: newList });
+    } catch (err) {
+      alert(err);
+    }
+  };
 
   return (
     <Drawer
       container={window.document.body}
       variant="permanent"
-      open="true"
+      open={true}
       sx={{
         width: sidebarWidth,
         height: "100vh",
@@ -127,7 +139,7 @@ const Sidebar = () => {
         </ListItem>
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable
-            key={"list-board-droppable"}
+            key={"list-board-droppable-key"}
             droppableId={"list-board-droppable"}
           >
             {(provided) => (
