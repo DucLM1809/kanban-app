@@ -28,14 +28,17 @@ const Signup = () => {
       err = true;
       setUsernameErrText("Please fill this field");
     }
+
     if (password === "") {
       err = true;
       setPasswordErrText("Please fill this field");
     }
+
     if (confirmPassword === "") {
       err = true;
       setConfirmPasswordErrText("Please fill this field");
     }
+    
     if (password !== confirmPassword) {
       err = true;
       setConfirmPasswordErrText("Confirm password not match");
