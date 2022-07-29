@@ -19,4 +19,16 @@ router.get(
   boardController.getOne
 );
 
+router.put(
+  "/:boardId",
+  param("boardId").custom((value) => {
+    if (!validation.isObjectId(value)) {
+      return Promise.reject("Invalid id");
+    } else return Promise.resolve()
+  }),
+  validation.validate,
+  tokenHandler.verifyToken,
+  boardController.update
+);
+
 module.exports = router;
