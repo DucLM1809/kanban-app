@@ -16,11 +16,14 @@ import EmojiPicker from "../components/common/EmojiPicker";
 import boardApi from "../api/boardApi";
 import { setBoards } from "../redux/features/boardSlice";
 
+let timer;
+const timeout = 500;
+
 const Board = () => {
   const dispatch = useDispatch();
   const { boardId } = useParams();
   const [title, setTitle] = useState("");
-  const [description, setDiscription] = useState("");
+  const [description, setDescription] = useState("");
   const [sections, setSections] = useState([]);
   const [isFavourite, setIsFavourite] = useState(false);
   const [icon, setIcon] = useState("");
@@ -32,7 +35,7 @@ const Board = () => {
       try {
         const res = await boardApi.getOne(boardId);
         setTitle(res.title);
-        setDiscription(res.description);
+        setDescription(res.description);
         setSections(res.sections);
         setIsFavourite(res.favourite);
         setIcon(res.icon);
@@ -54,6 +57,37 @@ const Board = () => {
     } catch (err) {
       alert(err);
     }
+  };
+
+  const updateTitle = async (e) => {
+    clearTimeout(timer);
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    let temp = [...boards];
+    const index = temp.findIndex((e) => e.id === boardId);
+    temp[index] = { ...temp[index], title: newTitle };
+    dispatch(setBoards(temp));
+
+    timer = setTimeout(async () => {
+      try {
+        await boardApi.update(boardId, { title: newTitle });
+      } catch (err) {
+        alert(err);
+      }
+    }, timeout);
+  };
+
+  const updateDescription = async (e) => {
+    clearTimeout(timer);
+    const newDescription = e.target.value;
+    setDescription(newDescription);
+    timer = setTimeout(async () => {
+      try {
+        await boardApi.update(boardId, { description: newDescription });
+      } catch (err) {
+        alert(err);
+      }
+    }, timeout);
   };
 
   return (
@@ -87,6 +121,7 @@ const Board = () => {
           <EmojiPicker icon={icon} onChange={onIconChange} />
           <TextField
             value={title}
+            onChange={updateTitle}
             placeholder="Untitled"
             variant="outlined"
             fullWidth
@@ -102,6 +137,7 @@ const Board = () => {
         </Box>
         <TextField
           value={description}
+          onChange={updateDescription}
           placeholder="Add a description"
           variant="outlined"
           multiline
