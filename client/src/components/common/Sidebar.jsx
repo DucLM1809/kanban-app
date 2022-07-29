@@ -68,6 +68,17 @@ const Sidebar = () => {
     }
   };
 
+  const addBoard = async () => {
+    try {
+      const res = await boardApi.create();
+      const newList = [res, ...boards];
+      dispatch(setBoards(newList));
+      navigate(`boards/${res.id}`);
+    } catch (err) {
+      alert(err);
+    }
+  };
+
   return (
     <Drawer
       container={window.document.body}
@@ -132,7 +143,7 @@ const Sidebar = () => {
             <Typography variant="body2" fontWeight={700}>
               Private
             </Typography>
-            <IconButton>
+            <IconButton onClick={addBoard}>
               <AddBoxOutlinedIcon fontSize="small" />
             </IconButton>
           </Box>
@@ -176,6 +187,7 @@ const Sidebar = () => {
                     )}
                   </Draggable>
                 ))}
+                {provided.placeholder}
               </div>
             )}
           </Droppable>
