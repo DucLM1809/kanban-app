@@ -1,53 +1,70 @@
 const router = require("express").Router({ mergeParams: true });
 const tokenHandler = require("../handlers/tokenHandler");
 const validation = require("../handlers/validation");
-const { param } = require("express-validator");
-const sectionController = require("../controllers/section");
+const { param, body } = require("express-validator");
+const taskController = require("../controllers/task");
 
 router.post(
   "/",
   param("boardId").custom((value) => {
     if (!validation.isObjectId(value)) {
-      return Promise.reject("Invalid id");
+      return Promise.reject("Invalid board id");
+    } else return Promise.resolve();
+  }),
+  body("sectionId").custom((value) => {
+    if (!validation.isObjectId(value)) {
+      return Promise.reject("Invalid section id");
     } else return Promise.resolve();
   }),
   validation.validate,
   tokenHandler.verifyToken,
-  sectionController.create
+  taskController.create
 );
 
 router.put(
-  "/:sectionId",
+  "/update-position",
   param("boardId").custom((value) => {
     if (!validation.isObjectId(value)) {
       return Promise.reject("Invalid board id");
     } else return Promise.resolve();
   }),
-  param("sectionId").custom((value) => {
-    if (!validation.isObjectId(value)) {
-      return Promise.reject("Invalid section id");
-    } else return Promise.resolve();
-  }),
   validation.validate,
   tokenHandler.verifyToken,
-  sectionController.update
+  taskController.updatePosition
 );
 
 router.delete(
-  "/:sectionId",
+  "/:taskId",
   param("boardId").custom((value) => {
     if (!validation.isObjectId(value)) {
       return Promise.reject("Invalid board id");
     } else return Promise.resolve();
   }),
-  param("sectionId").custom((value) => {
+  param("taskId").custom((value) => {
     if (!validation.isObjectId(value)) {
-      return Promise.reject("Invalid section id");
+      return Promise.reject("Invalid task id");
     } else return Promise.resolve();
   }),
   validation.validate,
   tokenHandler.verifyToken,
-  sectionController.delete
+  taskController.delete
+);
+
+router.put(
+  "/:taskId",
+  param("boardId").custom((value) => {
+    if (!validation.isObjectId(value)) {
+      return Promise.reject("Invalid board id");
+    } else return Promise.resolve();
+  }),
+  param("taskId").custom((value) => {
+    if (!validation.isObjectId(value)) {
+      return Promise.reject("Invalid task id");
+    } else return Promise.resolve();
+  }),
+  validation.validate,
+  tokenHandler.verifyToken,
+  taskController.update
 );
 
 module.exports = router;

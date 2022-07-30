@@ -20,7 +20,7 @@ const FavouriteList = () => {
       } catch (err) {}
     };
     getBoards();
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     const index = list.findIndex((e) => e.id === boardId);
