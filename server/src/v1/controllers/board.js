@@ -69,7 +69,7 @@ exports.update = async (req, res) => {
         user: currentBoard.user,
         favourite: true,
         _id: { $ne: boardId },
-      });
+      }).sort("favouritePosition");
       if (favourite) {
         req.body.favouritePosition =
           favourites.length > 0 ? favourites.length : 0;
@@ -85,6 +85,73 @@ exports.update = async (req, res) => {
 
     const board = await Board.findByIdAndUpdate(boardId, { $set: req.body });
     res.status(200).json(board);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+exports.getFavourites = async (req, res) => {
+  try {
+    const favourites = await Board.find({
+      user: req.user._id,
+      favourite: true,
+    }).sort("-favouritePosition");
+    res.status(200).json(favourites);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+exports.updateFavouritePosition = async (req, res) => {
+  const { boards } = req.body;
+  try {
+    for (const key in boards.reverse()) {
+      const board = boards[key];
+      await Board.findByIdAndUpdate(board.id, {
+        $set: { favouritePosition: key },
+      });
+    }
+    res.status(200).json("updated");
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+exports.delete = async (req, res) => {
+  const { boardId } = req.params;
+  try {
+    const sections = await Section.find({ board: boardId });
+    for (const section of sections) {
+      Task.deleteMany({ section: section.id });
+    }
+    await Section.deleteMany({ board: boardId });
+
+    const currentBoard = await Board.findById(boardId);
+
+    if (currentBoard.favourite) {
+      const favourites = await Board.find({
+        user: currentBoard.user,
+        favourite: true,
+        _id: { $ne: boardId },
+      }).sort("favouritePosition");
+
+      for (const key in favourites) {
+        const element = favourites[key];
+        await Board.findByIdAndUpdate(element.id, {
+          $set: { favouritePosition: key },
+        });
+      }
+    }
+
+    await Board.deleteOne({ _id: boardId });
+
+    const boards = await Board.find().sort('position')
+    for (const key in boards) {
+      const board = boards[key];
+      await Board.findByIdAndUpdate(board.id, { $set: { position: key } });
+    }
+
+    res.status(200).json('deleted')
   } catch (err) {
     res.status(500).json(err);
   }
